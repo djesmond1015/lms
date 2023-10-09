@@ -2,13 +2,11 @@ require('dotenv').config();
 import { Request, Response, NextFunction } from 'express';
 import { CatchAsyncErrors } from '../middleware/catchAsyncErrors';
 import ErrorHandler from '../utils/ErrorHandler';
-import userModal from '../models/user.model';
+import userModal, { IUser } from '../models/user.model';
 import jwt, { Secret } from 'jsonwebtoken';
-import ejs from 'ejs';
-import path from 'path';
 import sendMail from '../utils/sendMail';
 
-// register user
+// Register user
 interface IRegisterBody {
   name: string;
   email: string;
@@ -68,7 +66,7 @@ export const registerHandler = CatchAsyncErrors(
 export const createActivationToken = (user: any) => {
   const activationCode = Math.floor(1000 + Math.random() * 9000).toString();
 
-  const token = jwt.sign(
+  const activationToken = jwt.sign(
     {
       user,
       activationCode,
@@ -79,5 +77,50 @@ export const createActivationToken = (user: any) => {
     }
   );
 
-  return { token, activationCode };
+  return { activationToken, activationCode };
 };
+
+// Activate User
+interface IActivationRequest {
+  activationToken: string;
+  activationCode: string;
+}
+
+export const activateUser = CatchAsyncErrors(
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { activationCode, activationToken } =
+        req.body as IActivationRequest;
+
+      const newUser: { user: IUser; activationCode: string } = jwt.verify(
+        activationToken,
+        process.env.ACTIVATION_SECRET as string
+      ) as { user: IUser; activationCode: string };
+
+      if (newUser.activationCode !== activationCode) {
+        return next(new ErrorHandler('Invalid Activation Code', 400));
+      }
+
+      const { name, email, password } = newUser.user;
+
+      const existUser = await userModal.findOne({ email });
+
+      if (existUser) {
+        return next(new ErrorHandler('Email already exist', 409));
+      }
+
+      const user = await userModal.create({
+        name,
+        email,
+        password,
+      });
+
+      res.status(201).json({
+        success: true,
+        user,
+      });
+    } catch (error: any) {
+      return next(new ErrorHandler(error.message, 400));
+    }
+  }
+);
