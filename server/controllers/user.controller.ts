@@ -43,10 +43,10 @@ export const registerHandler = CatchAsyncErrors(
         activationCode,
       };
 
-      const html = await ejs.renderFile(
-        path.join(__dirname, '../mails/activation-mail.ejs'),
-        data
-      );
+      // const html = await ejs.renderFile(
+      //   path.join(__dirname, '../mails/activation-mail.ejs'),
+      //   data
+      // );
 
       try {
         await sendMail({
