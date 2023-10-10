@@ -8,6 +8,7 @@ import jwt, { Secret } from 'jsonwebtoken';
 import sendMail from '../utils/sendMail';
 import { sendToken } from '../utils/jwt';
 import userModel from '../models/user.model';
+import { redis } from '../utils/redis';
 
 // Register user
 interface IRegisterRequest {
@@ -168,6 +169,10 @@ export const logoutUser = CatchAsyncError(
     try {
       res.cookie('access_token', '', { maxAge: 1 });
       res.cookie('refresh_cookie', '', { maxAge: 1 });
+
+      const userId = req.user?._id;
+
+      redis.del(userId);
 
       res.status(200).json({
         success: true,
