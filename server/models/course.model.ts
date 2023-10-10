@@ -1,6 +1,5 @@
 import mongoose, { Document, Schema, Model } from 'mongoose';
 import { IUser } from './user.model';
-import { IcalAttachment } from 'nodemailer/lib/mailer';
 
 export interface IComment extends Document {
   user: IUser;
