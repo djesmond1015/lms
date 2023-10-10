@@ -1,13 +1,9 @@
 require('dotenv').config();
 import mongoose, { Document, Model, Schema } from 'mongoose';
 import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
 
 const emailRegexPattern: RegExp = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-export enum UserRole {
-  user = 'USER',
-  admin = 'ADMIN',
-}
 
 export interface IUser extends Document {
   name: string;
@@ -17,10 +13,12 @@ export interface IUser extends Document {
     public_id: string;
     url: string;
   };
-  role: UserRole;
+  role: string;
   isVerified: boolean;
   courses: Array<{ courseId: string }>;
   comparePassword: (password: string) => Promise<boolean>;
+  signAccessToken: () => string;
+  signRefreshToken: () => string;
 }
 
 const userSchema: Schema<IUser> = new mongoose.Schema(
@@ -33,16 +31,17 @@ const userSchema: Schema<IUser> = new mongoose.Schema(
       type: String,
       required: [true, 'Please enter your email'],
       validate: {
-        validator: function (v: string) {
-          return emailRegexPattern.test(v);
+        validator: function (value: string) {
+          return emailRegexPattern.test(value);
         },
-        message: 'Please enter a valid email',
+        message: 'please enter a valid email',
       },
       unique: true,
     },
     password: {
       type: String,
       minlength: [6, 'Password must be at least 6 characters'],
+      select: false,
     },
     avatar: {
       public_id: String,
@@ -50,7 +49,7 @@ const userSchema: Schema<IUser> = new mongoose.Schema(
     },
     role: {
       type: String,
-      default: UserRole.user,
+      default: 'user',
     },
     isVerified: {
       type: Boolean,
@@ -65,7 +64,7 @@ const userSchema: Schema<IUser> = new mongoose.Schema(
   { timestamps: true }
 );
 
-//  Hash Password before saving
+// Hash Password before saving
 userSchema.pre<IUser>('save', async function (next) {
   if (!this.isModified('password')) {
     next();
@@ -74,13 +73,28 @@ userSchema.pre<IUser>('save', async function (next) {
   next();
 });
 
-// TODO: Sign access token and sign refresh token
+// sign access token
+// TODO: Determine the expireIn value whether it should be in hours or minutes
+userSchema.methods.signAccessToken = function () {
+  return jwt.sign({ id: this._id }, process.env.ACCESS_TOKEN || '', {
+    expiresIn: '5m',
+  });
+};
 
-// Compare password
-userSchema.methods.comparePassword = async function (enteredPassword: string) {
+// sign refresh token
+userSchema.methods.signRefreshToken = function () {
+  return jwt.sign({ id: this._id }, process.env.REFRESH_TOKEN || '', {
+    expiresIn: '3d',
+  });
+};
+
+// compare password
+userSchema.methods.comparePassword = async function (
+  enteredPassword: string
+): Promise<boolean> {
   return await bcrypt.compare(enteredPassword, this.password);
 };
 
-const userModal: Model<IUser> = mongoose.model('User', userSchema);
+const userModel: Model<IUser> = mongoose.model('User', userSchema);
 
-export default userModal;
+export default userModel;
