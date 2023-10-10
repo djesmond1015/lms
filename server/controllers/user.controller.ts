@@ -3,7 +3,7 @@ import { Request, Response, NextFunction } from 'express';
 import { CatchAsyncError } from '../middleware/catchAsyncError';
 import ErrorHandler from '../utils/ErrorHandler';
 
-import userModal, { IUser } from '../models/user.model';
+import userModel, { IUser } from '../models/user.model';
 import jwt, { JwtPayload, Secret } from 'jsonwebtoken';
 import sendMail from '../utils/sendMail';
 import {
@@ -11,7 +11,6 @@ import {
   refreshTokenOptions,
   sendToken,
 } from '../utils/jwt';
-import userModel from '../models/user.model';
 import { redis } from '../utils/redis';
 import { getUserById } from '../services/user.service';
 
@@ -28,7 +27,7 @@ export const registerHandler = CatchAsyncError(
     try {
       const { name, email, password } = req.body as IRegisterBody;
 
-      const isEmailExist = await userModal.findOne({ email });
+      const isEmailExist = await userModel.findOne({ email });
       if (isEmailExist) {
         return next(new ErrorHandler('Email already exist', 400));
       }
@@ -111,13 +110,13 @@ export const activateUser = CatchAsyncError(
 
       const { name, email, password } = newUser.user;
 
-      const existUser = await userModal.findOne({ email });
+      const existUser = await userModel.findOne({ email });
 
       if (existUser) {
         return next(new ErrorHandler('Email already exist', 409));
       }
 
-      const user = await userModal.create({
+      const user = await userModel.create({
         name,
         email,
         password,
@@ -287,6 +286,37 @@ export const socialAuth = CatchAsyncError(
       } else {
         sendToken(user, 200, res);
       }
+    } catch (error: any) {
+      return next(new ErrorHandler(error.message, 400));
+    }
+  }
+);
+
+// Update user info
+interface IUpdateUserInfoBody {
+  name: string;
+}
+
+export const updateUserInfo = CatchAsyncError(
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { name } = req.body as IUpdateUserInfoBody;
+
+      const userId = req.user?._id;
+      const user = await userModel.findById(userId);
+
+      if (name && user) {
+        user.name = name;
+      }
+
+      await user?.save();
+
+      await redis.set(userId, JSON.stringify(user));
+
+      res.status(200).json({
+        success: true,
+        user,
+      });
     } catch (error: any) {
       return next(new ErrorHandler(error.message, 400));
     }
