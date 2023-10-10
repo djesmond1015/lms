@@ -5,6 +5,11 @@ import jwt from 'jsonwebtoken';
 
 const emailRegexPattern: RegExp = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+export enum UserRoles {
+  USER = 'user',
+  ADMIN = 'admin',
+}
+
 export interface IUser extends Document {
   name: string;
   email: string;
@@ -13,7 +18,7 @@ export interface IUser extends Document {
     public_id: string;
     url: string;
   };
-  role: string;
+  role: UserRoles;
   isVerified: boolean;
   courses: Array<{ courseId: string }>;
   comparePassword: (password: string) => Promise<boolean>;
@@ -49,7 +54,7 @@ const userSchema: Schema<IUser> = new mongoose.Schema(
     },
     role: {
       type: String,
-      default: 'user',
+      default: UserRoles.USER,
     },
     isVerified: {
       type: Boolean,
