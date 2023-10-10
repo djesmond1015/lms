@@ -322,3 +322,46 @@ export const updateUserInfo = CatchAsyncError(
     }
   }
 );
+
+// Update user password
+interface IUpdateUserPasswordBody {
+  oldPassword: string;
+  newPassword: string;
+}
+
+export const updateUserPassword = CatchAsyncError(
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { oldPassword, newPassword } = req.body as IUpdateUserPasswordBody;
+
+      if (!oldPassword || !newPassword) {
+        return next(new ErrorHandler('Please enter old and new password', 400));
+      }
+
+      const user = await userModel.findById(req.user?._id).select('+password');
+
+      if (user?.password === undefined || user?.password === null) {
+        return next(new ErrorHandler('Invalid user', 400));
+      }
+
+      const isPasswordMatched = await user.comparePassword(oldPassword);
+
+      if (!isPasswordMatched) {
+        return next(new ErrorHandler('Invalid old password', 400));
+      }
+
+      user.password = newPassword;
+
+      await user.save();
+
+      await redis.set(req.user?._id as string, JSON.stringify(user));
+
+      res.status(201).json({
+        success: true,
+        user,
+      });
+    } catch (error: any) {
+      return next(new ErrorHandler(error.message, 400));
+    }
+  }
+);
