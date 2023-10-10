@@ -6,8 +6,8 @@ import jwt from 'jsonwebtoken';
 const emailRegexPattern: RegExp = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export enum UserRoles {
-  USER = 'user',
-  ADMIN = 'admin',
+  USER = 'USER',
+  ADMIN = 'ADMIN',
 }
 
 export interface IUser extends Document {
