@@ -15,7 +15,6 @@ import {
 
 const courseRouter = express.Router();
 
-// TODO: Test this api again
 courseRouter.post(
   '/create-course',
   isAuthenticated,
