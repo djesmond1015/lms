@@ -29,7 +29,7 @@ export const createOrder = CatchAsyncError(
 
       if (isCourseExist) {
         return next(
-          new ErrorHandler('You have already purchased this course', 400)
+          new ErrorHandler('You have already purchased this course', 409)
         );
       }
 
