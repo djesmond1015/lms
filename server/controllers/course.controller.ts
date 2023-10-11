@@ -388,6 +388,12 @@ export const addReview = CatchAsyncError(
       await course?.save();
 
       // TODO: Add to redis
+      await redis.set(
+        courseId,
+        JSON.stringify(course),
+        'EX',
+        604800
+      ); /* 7 days */
 
       await NotificationModel.create({
         user: req.user?._id,
@@ -458,11 +464,37 @@ export const addReviewReply = CatchAsyncError(
   }
 );
 
-// Get all courses -- admin
+// Get all courses -- Admin
 export const getAllCourses = CatchAsyncError(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       getAllCoursesService(res);
+    } catch (error: any) {
+      return next(new ErrorHandler(error.message, 500));
+    }
+  }
+);
+
+// Delete course -- Admin
+export const deleteCourse = CatchAsyncError(
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { courseId } = req.params;
+
+      const course = await courseModel.findById(courseId);
+
+      if (!course) {
+        return next(new ErrorHandler('Course not found', 404));
+      }
+
+      await course.deleteOne({ courseId });
+
+      await redis.del(courseId);
+
+      res.status(200).json({
+        success: true,
+        message: 'Course deleted successfully',
+      });
     } catch (error: any) {
       return next(new ErrorHandler(error.message, 500));
     }
