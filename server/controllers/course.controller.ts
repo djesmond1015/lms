@@ -5,6 +5,8 @@ import ErrorHandler from '../utils/ErrorHandler';
 import cloudinary from 'cloudinary';
 import { createCourse } from '../services/course.service';
 import courseModel from '../models/course.model';
+import { redis } from '../utils/redis';
+import { isCallChain } from 'typescript';
 
 // Upload course
 export const uploadCourse = CatchAsyncError(
@@ -76,6 +78,46 @@ export const updateCourse = CatchAsyncError(
         success: true,
         course,
       });
+    } catch (error: any) {
+      return next(new ErrorHandler(error.message, 500));
+    }
+  }
+);
+
+// Get single course -- without purchasing
+export const getSingleCourse = CatchAsyncError(
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const courseId = req.params.courseId;
+
+      const isCacheExist = await redis.get(courseId);
+
+      if (isCacheExist) {
+        const cacheCourse = JSON.parse(courseId);
+
+        res.status(200).json({
+          success: true,
+          cacheCourse,
+        });
+      } else {
+        const course = await courseModel
+          .findById(courseId)
+          .select(
+            '-courseData.videoUrl -courseData.suggestion -courseData.questions -courseData.links'
+          );
+
+        await redis.set(
+          courseId,
+          JSON.stringify(course),
+          'EX',
+          604800
+        ); /* 7 days */
+
+        res.status(200).json({
+          success: true,
+          course,
+        });
+      }
     } catch (error: any) {
       return next(new ErrorHandler(error.message, 500));
     }
