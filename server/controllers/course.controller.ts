@@ -387,3 +387,56 @@ export const addReview = CatchAsyncError(
     }
   }
 );
+
+// Add reply in course review
+interface IAddReviewReplyBody {
+  reply: string;
+  courseId: string;
+  reviewId: string;
+}
+
+export const addReviewReply = CatchAsyncError(
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { reply, courseId, reviewId } = req.body as IAddReviewReplyBody;
+
+      if (!reply || !courseId || !reviewId) {
+        return next(new ErrorHandler('Missing required fields', 400));
+      }
+
+      const course = await courseModel.findById(courseId);
+
+      if (!course) {
+        return next(new ErrorHandler('Course not found', 404));
+      }
+
+      const review = course.reviews.find(
+        (review: any) => review._id.toString() === reviewId
+      );
+
+      if (!review) {
+        return next(new ErrorHandler('Review not found', 404));
+      }
+
+      const replyData: any = {
+        user: req.user,
+        reply,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+
+      review.commentReplies.push(replyData);
+
+      await course?.save();
+
+      // TODO: Add to redis
+
+      res.status(200).json({
+        success: true,
+        course,
+      });
+    } catch (error: any) {
+      return next(new ErrorHandler(error.message, 500));
+    }
+  }
+);

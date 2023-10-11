@@ -5,6 +5,7 @@ import {
   addQuestion,
   addQuestionReply,
   addReview,
+  addReviewReply,
   getCourseByUser,
   getCourses,
   getSingleCourse,
@@ -44,5 +45,12 @@ courseRouter.put('/add-question', isAuthenticated, addQuestion);
 courseRouter.put('/add-question-reply', isAuthenticated, addQuestionReply);
 
 courseRouter.put('/review/:courseId', isAuthenticated, addReview);
+
+courseRouter.put(
+  '/review-reply',
+  isAuthenticated,
+  authorizeRoles(UserRoles.ADMIN),
+  addReviewReply
+);
 
 export default courseRouter;
