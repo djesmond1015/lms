@@ -4,6 +4,7 @@ import { UserRoles } from '../models/user.model';
 import {
   addQuestion,
   addQuestionReply,
+  addReview,
   getCourseByUser,
   getCourses,
   getSingleCourse,
@@ -41,5 +42,7 @@ courseRouter.get(
 courseRouter.put('/add-question', isAuthenticated, addQuestion);
 
 courseRouter.put('/add-question-reply', isAuthenticated, addQuestionReply);
+
+courseRouter.put('/review/:courseId', isAuthenticated, addReview);
 
 export default courseRouter;

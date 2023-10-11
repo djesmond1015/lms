@@ -323,3 +323,67 @@ export const addQuestionReply = CatchAsyncError(
     }
   }
 );
+
+// Add review in course
+interface IAddReviewBody {
+  review: string;
+  rating: number;
+}
+
+export const addReview = CatchAsyncError(
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const userCourseList = req.user?.courses;
+
+      const courseId = req.params.courseId;
+
+      const isCourseExist = userCourseList?.find(
+        (course: any) => course._id.toString() === courseId
+      );
+
+      if (!isCourseExist) {
+        return next(
+          new ErrorHandler('You are not eligible to access this course', 404)
+        );
+      }
+
+      const course = await courseModel.findById(courseId);
+
+      const { rating, review } = req.body as IAddReviewBody;
+
+      if (!rating || !review) {
+        return next(new ErrorHandler('Missing required fields', 400));
+      }
+
+      const reviewData: any = {
+        user: req.user,
+        rating,
+        comment: review,
+      };
+
+      course?.reviews.push(reviewData);
+
+      const totalRating = course?.reviews.reduce((total, review) => {
+        if (review.rating) {
+          return total + review.rating;
+        }
+        return total;
+      }, 0);
+
+      if (course && totalRating !== undefined) {
+        course.ratings = totalRating / course.reviews.length;
+      }
+
+      await course?.save();
+
+      // TODO: Add to redis
+
+      res.status(200).json({
+        success: true,
+        course,
+      });
+    } catch (error: any) {
+      return next(new ErrorHandler(error.message, 500));
+    }
+  }
+);
