@@ -3,6 +3,7 @@ import { createCourse } from '../services/course.service';
 import { authorizeRoles, isAuthenticated } from '../middleware/auth';
 import { UserRoles } from '../models/user.model';
 import {
+  getCourseByUser,
   getCourses,
   getSingleCourse,
   updateCourse,
@@ -27,5 +28,11 @@ courseRouter.put(
 courseRouter.get('/courses/:courseId', getSingleCourse);
 
 courseRouter.get('/courses', getCourses);
+
+courseRouter.get(
+  '/courses/:courseId/content',
+  isAuthenticated,
+  getCourseByUser
+);
 
 export default courseRouter;
