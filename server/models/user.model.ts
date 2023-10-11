@@ -79,7 +79,6 @@ userSchema.pre<IUser>('save', async function (next) {
 });
 
 // sign access token
-// TODO: Determine the expireIn value whether it should be in hours or minutes
 userSchema.methods.signAccessToken = function () {
   return jwt.sign({ id: this._id }, process.env.ACCESS_TOKEN || '', {
     expiresIn: '5m',

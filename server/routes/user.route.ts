@@ -24,7 +24,7 @@ userRouter.post('/login', loginUser);
 userRouter.get('/logout', isAuthenticated, logoutUser);
 
 // TODO: Use this as middleware
-userRouter.get('/refresh-token', updateAccessToken);
+// userRouter.get('/refresh-token', updateAccessToken);
 
 userRouter.get('/me', isAuthenticated, getUserInfo);
 

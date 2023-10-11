@@ -237,13 +237,12 @@ export const updateAccessToken = CatchAsyncError(
         604800
       ); /* 7 days */
 
-      res.status(200).json({
-        success: true,
-        accessToken,
-      });
+      // res.status(200).json({
+      //   success: true,
+      //   accessToken,
+      // });
 
-      // TODO: Use this as middleware
-      // next();
+      next();
     } catch (error: any) {
       return next(new ErrorHandler(error.message, 400));
     }
