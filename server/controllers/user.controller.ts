@@ -474,7 +474,7 @@ export const updateUserRole = CatchAsyncError(
 export const deleteUser = CatchAsyncError(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const userId = req.params.userId;
+      const { userId } = req.params;
 
       const user = await userModel.findById(userId);
 

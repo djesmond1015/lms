@@ -28,7 +28,7 @@ export const getAllNotifications = CatchAsyncError(
 export const updateNotification = CatchAsyncError(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const notificationId = req.params.notificationId;
+      const { notificationId } = req.params;
 
       const notification = await NotificationModel.findById(notificationId);
 

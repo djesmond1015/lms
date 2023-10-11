@@ -46,7 +46,7 @@ export const updateCourse = CatchAsyncError(
 
       const thumbnail = data.thumbnail;
 
-      const courseId = req.params.courseId;
+      const { courseId } = req.params;
 
       const courseData = (await courseModel.findById(courseId)) as any;
 
@@ -91,7 +91,7 @@ export const updateCourse = CatchAsyncError(
 export const getSingleCourse = CatchAsyncError(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const courseId = req.params.courseId;
+      const { courseId } = req.params;
 
       const isCacheExist = await redis.get(courseId);
 
@@ -153,7 +153,7 @@ export const getCourses = CatchAsyncError(
 export const getCourseByUser = CatchAsyncError(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const courseId = req.params.courseId;
+      const { courseId } = req.params;
       const userCourseList = req.user?.courses;
 
       const isCourseExist = userCourseList?.find(
@@ -346,7 +346,7 @@ export const addReview = CatchAsyncError(
     try {
       const userCourseList = req.user?.courses;
 
-      const courseId = req.params.courseId;
+      const { courseId } = req.params;
 
       const isCourseExist = userCourseList?.find(
         (course: any) => course._id.toString() === courseId
