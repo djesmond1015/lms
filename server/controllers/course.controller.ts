@@ -7,6 +7,7 @@ import { createCourse } from '../services/course.service';
 import courseModel from '../models/course.model';
 import { redis } from '../utils/redis';
 import mongoose from 'mongoose';
+import sendMail from '../utils/sendMail';
 
 // Upload course
 export const uploadCourse = CatchAsyncError(
@@ -229,6 +230,89 @@ export const addQuestion = CatchAsyncError(
 
       // Save the updated course
       await course?.save();
+
+      res.status(200).json({
+        success: true,
+        course,
+      });
+    } catch (error: any) {
+      return next(new ErrorHandler(error.message, 500));
+    }
+  }
+);
+
+// Add question reply in course question
+interface IAddQuestionReplyBody {
+  reply: string;
+  courseId: string;
+  contentId: string;
+  questionId: string;
+}
+
+export const addQuestionReply = CatchAsyncError(
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { reply, courseId, contentId, questionId } =
+        req.body as IAddQuestionReplyBody;
+
+      if (!reply || !courseId || !contentId || !questionId) {
+        return next(new ErrorHandler('Missing required fields', 400));
+      }
+
+      const course = await courseModel.findById(courseId);
+
+      if (!mongoose.Types.ObjectId.isValid(contentId)) {
+        return next(new ErrorHandler('Invalid content ID', 400));
+      }
+
+      const courseContent = course?.courseData.find((content: any) =>
+        content._id.equals(contentId)
+      );
+
+      if (!courseContent) {
+        return next(new ErrorHandler('Invalid content ID', 400));
+      }
+
+      const question = courseContent.questions.find((question: any) =>
+        question._id.equals(questionId)
+      );
+
+      if (!question) {
+        return next(new ErrorHandler('Invalid question ID', 400));
+      }
+
+      // Create a new question reply object
+      const newQuestionReply: any = {
+        user: req.user,
+        reply,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+
+      // Add this question reply to the course content
+      question.questionReplies.push(newQuestionReply);
+
+      await course?.save();
+
+      if (req.user?._id === question.user._id) {
+        // TODO: Send a notification to the question user
+      } else {
+        const data = {
+          name: question.user.name,
+          title: courseContent.title,
+        };
+
+        try {
+          await sendMail({
+            email: question.user.email,
+            subject: 'Question Reply',
+            template: 'question-reply.ejs',
+            data,
+          });
+        } catch (error: any) {
+          return next(new ErrorHandler(error.message, 500));
+        }
+      }
 
       res.status(200).json({
         success: true,

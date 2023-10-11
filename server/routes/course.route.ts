@@ -3,6 +3,7 @@ import { authorizeRoles, isAuthenticated } from '../middleware/auth';
 import { UserRoles } from '../models/user.model';
 import {
   addQuestion,
+  addQuestionReply,
   getCourseByUser,
   getCourses,
   getSingleCourse,
@@ -38,5 +39,7 @@ courseRouter.get(
 );
 
 courseRouter.put('/add-question', isAuthenticated, addQuestion);
+
+courseRouter.put('/add-question-reply', isAuthenticated, addQuestionReply);
 
 export default courseRouter;
