@@ -469,3 +469,29 @@ export const updateUserRole = CatchAsyncError(
     }
   }
 );
+
+//  Delete user -- Admin
+export const deleteUser = CatchAsyncError(
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const userId = req.params.userId;
+
+      const user = await userModel.findById(userId);
+
+      if (!user) {
+        return next(new ErrorHandler('User not found', 404));
+      }
+
+      await userModel.deleteOne({ _id: userId });
+
+      await redis.del(userId);
+
+      res.status(200).json({
+        success: true,
+        message: 'User deleted successfully',
+      });
+    } catch (error: any) {
+      return next(new ErrorHandler(error.message, 500));
+    }
+  }
+);
