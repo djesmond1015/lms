@@ -3,7 +3,7 @@ import { Request, Response, NextFunction } from 'express';
 import { CatchAsyncError } from '../middleware/catchAsyncError';
 import ErrorHandler from '../utils/ErrorHandler';
 
-import userModel, { IUser } from '../models/user.model';
+import userModel, { IUser, UserRoles } from '../models/user.model';
 import jwt, { JwtPayload, Secret } from 'jsonwebtoken';
 import sendMail from '../utils/sendMail';
 import {
@@ -12,7 +12,11 @@ import {
   sendToken,
 } from '../utils/jwt';
 import { redis } from '../utils/redis';
-import { getAllUsersService, getUserById } from '../services/user.service';
+import {
+  getAllUsersService,
+  getUserById,
+  updateUserRoleService,
+} from '../services/user.service';
 import cloudinary from 'cloudinary';
 
 // Register user
@@ -431,6 +435,35 @@ export const getAllUsers = CatchAsyncError(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       getAllUsersService(res);
+    } catch (error: any) {
+      return next(new ErrorHandler(error.message, 500));
+    }
+  }
+);
+
+// Update user role -- Admin
+export const updateUserRole = CatchAsyncError(
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { email, role } = req.body;
+
+      if (!email || !role) {
+        return next(new ErrorHandler('Missing required fields', 400));
+      }
+
+      if (role && !(role in UserRoles)) {
+        return next(new ErrorHandler('Invalid email', 400));
+      }
+
+      const user = await userModel.findOne({ email });
+
+      if (!user) {
+        return next(new ErrorHandler('USer not found', 404));
+      }
+
+      const userId = user._id;
+
+      updateUserRoleService(userId, role, res);
     } catch (error: any) {
       return next(new ErrorHandler(error.message, 500));
     }
