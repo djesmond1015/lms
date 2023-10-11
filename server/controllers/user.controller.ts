@@ -12,7 +12,7 @@ import {
   sendToken,
 } from '../utils/jwt';
 import { redis } from '../utils/redis';
-import { getUserById } from '../services/user.service';
+import { getAllUsersService, getUserById } from '../services/user.service';
 import cloudinary from 'cloudinary';
 
 // Register user
@@ -422,6 +422,17 @@ export const updateProfilePicture = CatchAsyncError(
       });
     } catch (error: any) {
       return next(new ErrorHandler(error.message, 400));
+    }
+  }
+);
+
+// Get all users  -- Admin
+export const getAllUsers = CatchAsyncError(
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      getAllUsersService(res);
+    } catch (error: any) {
+      return next(new ErrorHandler(error.message, 500));
     }
   }
 );
