@@ -1,21 +1,23 @@
 import express from 'express';
-import { createCourse } from '../services/course.service';
 import { authorizeRoles, isAuthenticated } from '../middleware/auth';
 import { UserRoles } from '../models/user.model';
 import {
+  addQuestion,
   getCourseByUser,
   getCourses,
   getSingleCourse,
   updateCourse,
+  uploadCourse,
 } from '../controllers/course.controller';
 
 const courseRouter = express.Router();
 
+// TODO: Test this api again
 courseRouter.post(
   '/create-course',
   isAuthenticated,
   authorizeRoles(UserRoles.ADMIN),
-  createCourse
+  uploadCourse
 );
 
 courseRouter.put(
@@ -34,5 +36,7 @@ courseRouter.get(
   isAuthenticated,
   getCourseByUser
 );
+
+courseRouter.put('/add-question', isAuthenticated, addQuestion);
 
 export default courseRouter;

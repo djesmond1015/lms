@@ -6,7 +6,7 @@ import cloudinary from 'cloudinary';
 import { createCourse } from '../services/course.service';
 import courseModel from '../models/course.model';
 import { redis } from '../utils/redis';
-import { isCallChain } from 'typescript';
+import mongoose from 'mongoose';
 
 // Upload course
 export const uploadCourse = CatchAsyncError(
@@ -48,6 +48,7 @@ export const updateCourse = CatchAsyncError(
 
       const courseData = (await courseModel.findById(courseId)) as any;
 
+      // TODO: Need to modify a bit in the future
       if (thumbnail) {
         await cloudinary.v2.uploader.destroy(courseData.thumbnail.public_id);
 
@@ -170,6 +171,68 @@ export const getCourseByUser = CatchAsyncError(
       res.status(200).json({
         success: true,
         content,
+      });
+    } catch (error: any) {
+      return next(new ErrorHandler(error.message, 500));
+    }
+  }
+);
+
+interface IAddQuestionBody {
+  question: string;
+  courseId: string;
+  contentId: string;
+}
+
+export const addQuestion = CatchAsyncError(
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { question, courseId, contentId } = req.body as IAddQuestionBody;
+
+      if (!question) {
+        return next(new ErrorHandler('Question is required', 400));
+      }
+
+      if (!courseId) {
+        return next(new ErrorHandler('Course ID is require', 400));
+      }
+
+      if (!contentId) {
+        return next(new ErrorHandler('Content ID is required', 400));
+      }
+
+      const course = await courseModel.findById(courseId);
+
+      if (contentId && !mongoose.Types.ObjectId.isValid(contentId)) {
+        return next(new ErrorHandler('Invalid content ID', 400));
+      }
+
+      const courseContent = course?.courseData.find((content: any) =>
+        content._id.equals(contentId)
+      );
+
+      if (!courseContent) {
+        return next(new ErrorHandler('Invalid Content ID', 400));
+      }
+
+      // Create a new question object
+      const newQuestion: any = {
+        user: req.user,
+        question,
+        questionReplies: [],
+      };
+
+      // Add this question to the course content
+      courseContent.questions.push(newQuestion);
+
+      // TODO: Send notification to the course instructor
+
+      // Save the updated course
+      await course?.save();
+
+      res.status(200).json({
+        success: true,
+        course,
       });
     } catch (error: any) {
       return next(new ErrorHandler(error.message, 500));
