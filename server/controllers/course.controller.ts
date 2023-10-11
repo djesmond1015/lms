@@ -93,7 +93,9 @@ export const getSingleCourse = CatchAsyncError(
       const isCacheExist = await redis.get(courseId);
 
       if (isCacheExist) {
-        const cacheCourse = JSON.parse(courseId);
+        const cacheCourse = JSON.parse(isCacheExist);
+
+        console.log('cacheCourse', cacheCourse);
 
         res.status(200).json({
           success: true,
@@ -118,6 +120,26 @@ export const getSingleCourse = CatchAsyncError(
           course,
         });
       }
+    } catch (error: any) {
+      return next(new ErrorHandler(error.message, 500));
+    }
+  }
+);
+
+// Get courses -- without purchasing
+export const getCourses = CatchAsyncError(
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const courses = await courseModel
+        .find()
+        .select(
+          '-courseData.videoUrl -courseData.suggestion -courseData.links -courseData.questions'
+        );
+
+      res.status(200).json({
+        success: true,
+        courses,
+      });
     } catch (error: any) {
       return next(new ErrorHandler(error.message, 500));
     }
