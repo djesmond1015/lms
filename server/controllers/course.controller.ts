@@ -387,7 +387,6 @@ export const addReview = CatchAsyncError(
 
       await course?.save();
 
-      // TODO: Add to redis
       await redis.set(
         courseId,
         JSON.stringify(course),
@@ -452,7 +451,12 @@ export const addReviewReply = CatchAsyncError(
 
       await course?.save();
 
-      // TODO: Add to redis
+      await redis.set(
+        courseId,
+        JSON.stringify(course),
+        'EX',
+        604800
+      ); /* 7 days */
 
       res.status(200).json({
         success: true,
