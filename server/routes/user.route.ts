@@ -1,14 +1,8 @@
 import express from 'express';
 import {
-  activateUser,
   deleteUser,
   getAllUsers,
   getUserInfo,
-  loginUser,
-  logoutUser,
-  registerHandler,
-  socialAuth,
-  updateAccessToken,
   updateProfilePicture,
   updateUserInfo,
   updateUserPassword,
@@ -19,20 +13,7 @@ import { UserRoles } from '../models/user.model';
 
 const userRouter = express.Router();
 
-userRouter.post('/registration', registerHandler);
-
-userRouter.post('/activate-user', activateUser);
-
-userRouter.post('/login', loginUser);
-
-userRouter.get('/logout', isAuthenticated, logoutUser);
-
-// TODO: Use this as middleware
-// userRouter.get('/refresh-token', updateAccessToken);
-
 userRouter.get('/me', isAuthenticated, getUserInfo);
-
-userRouter.post('/social-auth', socialAuth);
 
 userRouter.put('/update-user-info', isAuthenticated, updateUserInfo);
 
