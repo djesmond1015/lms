@@ -381,7 +381,7 @@ export const addReview = CatchAsyncError(
         return total;
       }, 0);
 
-      if (course && totalRating !== undefined) {
+      if (course && totalRating !== undefined && course?.reviews.length > 0) {
         course.ratings = totalRating / course.reviews.length;
       }
 
