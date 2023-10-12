@@ -44,11 +44,13 @@ export const createLayout = CatchAsyncError(
         const banner = {
           type: LayoutType.BANNER,
           banner: {
-            public_id: uploadedBannerImage.public_id,
-            secure_url: uploadedBannerImage.secure_url,
+            image: {
+              public_id: uploadedBannerImage.public_id,
+              url: uploadedBannerImage.secure_url,
+            },
+            title,
+            subtitle,
           },
-          title,
-          subtitle,
         };
 
         await layoutModel.create(banner);
