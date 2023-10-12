@@ -208,3 +208,34 @@ export const editLayout = CatchAsyncError(
     }
   }
 );
+
+// Get layout by type
+export const getLayoutByType = CatchAsyncError(
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { type } = req.body;
+      // TODO: Change tp req.params instead of req.body
+
+      if (!type) {
+        return next(new ErrorHandler('Layout type is required', 400));
+      }
+
+      if (type && !(type in LayoutType)) {
+        return next(new ErrorHandler('Invalid layout type', 400));
+      }
+
+      const layout = await layoutModel.findOne({ type });
+
+      if (!layout) {
+        return next(new ErrorHandler(`${type} not found`, 404));
+      }
+
+      res.status(200).json({
+        success: true,
+        layout,
+      });
+    } catch (error: any) {
+      return next(new ErrorHandler(error.message, 500));
+    }
+  }
+);
