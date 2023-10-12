@@ -11,8 +11,7 @@ import {
 } from '../services/user.service';
 import cloudinary from 'cloudinary';
 
-// Register user
-
+// Get User Info
 export const getUserInfo = CatchAsyncError(
   async (req: Request, res: Response, next: NextFunction) => {
     try {

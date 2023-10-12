@@ -15,28 +15,28 @@ const userRouter = express.Router();
 
 userRouter.get('/me', isAuthenticated, getUserInfo);
 
-userRouter.put('/update-user-info', isAuthenticated, updateUserInfo);
+userRouter.put('/me/user-name', isAuthenticated, updateUserInfo);
 
-userRouter.put('/update-user-password', isAuthenticated, updateUserPassword);
+userRouter.put('/me/password', isAuthenticated, updateUserPassword);
 
-userRouter.put('/update-user-avatar', isAuthenticated, updateProfilePicture);
+userRouter.put('/me/profile-picture', isAuthenticated, updateProfilePicture);
 
 userRouter.get(
-  '/users',
+  '/admin/users',
   isAuthenticated,
   authorizeRoles(UserRoles.ADMIN),
   getAllUsers
 );
 
 userRouter.put(
-  '/update-user-role',
+  '/admin/users',
   isAuthenticated,
   authorizeRoles(UserRoles.ADMIN),
   updateUserRole
 );
 
 userRouter.delete(
-  '/delete-user/:userId',
+  '/admin/users/:userId',
   isAuthenticated,
   authorizeRoles(UserRoles.ADMIN),
   deleteUser
