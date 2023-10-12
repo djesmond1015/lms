@@ -54,6 +54,7 @@ const userSchema: Schema<IUser> = new mongoose.Schema(
     },
     role: {
       type: String,
+      enum: Object.values(UserRoles),
       default: UserRoles.USER,
     },
     isVerified: {
