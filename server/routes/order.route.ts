@@ -5,10 +5,10 @@ import { UserRoles } from '../models/user.model';
 
 const orderRouter = express.Router();
 
-orderRouter.post('/create-order', isAuthenticated, createOrder);
+orderRouter.post('/user/orders', isAuthenticated, createOrder);
 
 orderRouter.get(
-  '/orders',
+  '/admin/orders',
   isAuthenticated,
   authorizeRoles(UserRoles.ADMIN),
   getAllOrders

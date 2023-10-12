@@ -8,6 +8,7 @@ import courseModel from '../models/course.model';
 import sendMail from '../utils/sendMail';
 import NotificationModel from '../models/notification.model';
 import { getAllOrdersService, newOrder } from '../services/order.service';
+import { redis } from '../utils/redis';
 
 // TODO: Update the with payment_info
 //  Create order
@@ -62,7 +63,7 @@ export const createOrder = CatchAsyncError(
         if (user) {
           await sendMail({
             email: user.email,
-            subject: 'Order Confimation',
+            subject: 'Order Confirmation',
             template: 'order-confirmation.ejs',
             data: mailData,
           });
@@ -73,7 +74,7 @@ export const createOrder = CatchAsyncError(
 
       user?.courses.push(course?.id);
 
-      //  TODO: Add to redis
+      await redis.set(req.user?._id, JSON.stringify(user));
 
       await user?.save();
 

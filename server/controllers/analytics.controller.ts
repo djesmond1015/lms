@@ -7,7 +7,7 @@ import userModel from '../models/user.model';
 import orderModel from '../models/order.model';
 import NotificationModel from '../models/notification.model';
 
-// Get users analytics -- admin
+// Get users analytics -- Admin
 export const getUsersAnalytics = CatchAsyncError(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -23,7 +23,7 @@ export const getUsersAnalytics = CatchAsyncError(
   }
 );
 
-// Get orders analytics -- admin
+// Get orders analytics -- Admin
 export const getOrdersAnalytics = CatchAsyncError(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -39,7 +39,7 @@ export const getOrdersAnalytics = CatchAsyncError(
   }
 );
 
-// Get notifications analytics -- admin
+// Get notifications analytics -- Admin
 export const getNotificationsAnalytics = CatchAsyncError(
   async (req: Request, res: Response, next: NextFunction) => {
     try {

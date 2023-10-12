@@ -5,7 +5,7 @@ import layoutModel, { LayoutType } from '../models/layout.model';
 
 import cloudinary from 'cloudinary';
 
-// Create Layout
+// Create Layout -- Admin
 export const createLayout = CatchAsyncError(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -214,7 +214,7 @@ export const getLayoutByType = CatchAsyncError(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { type } = req.body;
-      // TODO: Change tp req.params instead of req.body
+      // TODO: Change to req.params instead of req.body
 
       if (!type) {
         return next(new ErrorHandler('Layout type is required', 400));

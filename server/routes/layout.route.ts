@@ -10,14 +10,14 @@ import {
 const layoutRouter = express.Router();
 
 layoutRouter.post(
-  '/layout',
+  '/users/admin/layout',
   isAuthenticated,
   authorizeRoles(UserRoles.ADMIN),
   createLayout
 );
 
 layoutRouter.put(
-  '/layout',
+  '/users/admin/layout',
   isAuthenticated,
   authorizeRoles(UserRoles.ADMIN),
   editLayout

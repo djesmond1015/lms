@@ -10,7 +10,7 @@ import mongoose from 'mongoose';
 import sendMail from '../utils/sendMail';
 import NotificationModel from '../models/notification.model';
 
-// Upload course
+// Upload course --Admin
 export const uploadCourse = CatchAsyncError(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -38,7 +38,7 @@ export const uploadCourse = CatchAsyncError(
   }
 );
 
-// Update course
+// Update course -- Admin
 export const updateCourse = CatchAsyncError(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -80,6 +80,26 @@ export const updateCourse = CatchAsyncError(
       res.status(201).json({
         success: true,
         course,
+      });
+    } catch (error: any) {
+      return next(new ErrorHandler(error.message, 500));
+    }
+  }
+);
+
+// Get courses -- without purchasing
+export const getCourses = CatchAsyncError(
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const courses = await courseModel
+        .find()
+        .select(
+          '-courseData.videoUrl -courseData.suggestion -courseData.links -courseData.questions'
+        );
+
+      res.status(200).json({
+        success: true,
+        courses,
       });
     } catch (error: any) {
       return next(new ErrorHandler(error.message, 500));
@@ -129,26 +149,6 @@ export const getSingleCourse = CatchAsyncError(
   }
 );
 
-// Get courses -- without purchasing
-export const getCourses = CatchAsyncError(
-  async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const courses = await courseModel
-        .find()
-        .select(
-          '-courseData.videoUrl -courseData.suggestion -courseData.links -courseData.questions'
-        );
-
-      res.status(200).json({
-        success: true,
-        courses,
-      });
-    } catch (error: any) {
-      return next(new ErrorHandler(error.message, 500));
-    }
-  }
-);
-
 // Get course content -- only for valid user
 export const getCourseByUser = CatchAsyncError(
   async (req: Request, res: Response, next: NextFunction) => {
@@ -186,6 +186,7 @@ interface IAddQuestionBody {
   contentId: string;
 }
 
+// Add question in course content -- only for valid user
 export const addQuestion = CatchAsyncError(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -247,7 +248,7 @@ export const addQuestion = CatchAsyncError(
   }
 );
 
-// Add question reply in course question
+// Add question reply in course question -- only for valid user
 interface IAddQuestionReplyBody {
   reply: string;
   courseId: string;
@@ -335,7 +336,7 @@ export const addQuestionReply = CatchAsyncError(
   }
 );
 
-// Add review in course
+// Add review in course -- only for valid user
 interface IAddReviewBody {
   review: string;
   rating: number;
@@ -410,7 +411,7 @@ export const addReview = CatchAsyncError(
   }
 );
 
-// Add reply in course review
+// Add reply in course review -- Admin
 interface IAddReviewReplyBody {
   reply: string;
   courseId: string;

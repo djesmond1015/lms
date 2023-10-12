@@ -9,7 +9,7 @@ export interface INotification extends Document {
   title: string;
   message: string;
   status: NotificationStatus;
-  userId: string;
+  // userId: string;
 }
 
 const notificationSchema = new Schema<INotification>(
@@ -26,10 +26,6 @@ const notificationSchema = new Schema<INotification>(
       type: String,
       required: true,
       default: NotificationStatus.UNREAD,
-    },
-    userId: {
-      type: String,
-      required: true,
     },
   },
   { timestamps: true }

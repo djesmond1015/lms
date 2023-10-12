@@ -18,51 +18,59 @@ import {
 const courseRouter = express.Router();
 
 courseRouter.post(
-  '/create-course',
+  '/users/admin/courses',
   isAuthenticated,
   authorizeRoles(UserRoles.ADMIN),
   uploadCourse
 );
 
 courseRouter.put(
-  '/update-course/:courseId',
+  '/users/admin/courses/:courseId',
   isAuthenticated,
   authorizeRoles(UserRoles.ADMIN),
   updateCourse
 );
 
-courseRouter.get('/courses/:courseId', getSingleCourse);
-
 courseRouter.get('/courses', getCourses);
 
+courseRouter.get('/courses/:courseId', getSingleCourse);
+
 courseRouter.get(
-  '/courses/:courseId/content',
+  '/users/me/courses/:courseId',
   isAuthenticated,
   getCourseByUser
 );
 
-courseRouter.put('/add-question', isAuthenticated, addQuestion);
-
-courseRouter.put('/add-question-reply', isAuthenticated, addQuestionReply);
-
-courseRouter.put('/review/:courseId', isAuthenticated, addReview);
+courseRouter.put('/users/me/courses/question', isAuthenticated, addQuestion);
 
 courseRouter.put(
-  '/review-reply',
+  '/users/me/courses/question-reply',
+  isAuthenticated,
+  addQuestionReply
+);
+
+courseRouter.put(
+  '/users/me/courses/:courseId/review',
+  isAuthenticated,
+  addReview
+);
+
+courseRouter.put(
+  '/users/admin/courses/course/review-reply',
   isAuthenticated,
   authorizeRoles(UserRoles.ADMIN),
   addReviewReply
 );
 
 courseRouter.get(
-  '/courses',
+  '/users/admin/courses',
   isAuthenticated,
   authorizeRoles(UserRoles.ADMIN),
   getAllCourses
 );
 
 courseRouter.delete(
-  '/courses/:courseId',
+  '/users/admin/courses/:courseId',
   isAuthenticated,
   authorizeRoles(UserRoles.ADMIN),
   deleteCourse

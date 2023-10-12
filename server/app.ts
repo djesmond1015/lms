@@ -35,11 +35,11 @@ app.use('/api/v1/users', userRouter);
 
 app.use('/api/v1', courseRouter);
 
-app.use('/api/v1', orderRouter);
+app.use('/api/v1/users', orderRouter);
 
-app.use('/api/v1', notificationRouter);
+app.use('/api/v1/users/admin', notificationRouter);
 
-app.use('/api/v1', analyticsRouter);
+app.use('/api/v1/users/admin', analyticsRouter);
 
 app.use('/api/v1', layoutRouter);
 
